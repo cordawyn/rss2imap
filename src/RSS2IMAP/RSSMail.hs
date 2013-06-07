@@ -12,7 +12,7 @@ import qualified Data.Text.Lazy as LT (pack)
 
 createMailFromItem :: Item -> IO Mail
 createMailFromItem i = simpleMail
-                       (Address Nothing "slava.kravchenko@gmail.com")
+                       (Address Nothing "your@email.com")
                        (Address Nothing "rss2imap@localhost")
                        (T.pack subject)
                        (LT.pack plainBody)
