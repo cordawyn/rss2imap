@@ -13,28 +13,30 @@ import Text.Feed.Import (parseFeedString)
 import Network.Mail.Mime (Mail (..), renderMail')
 import Network.HTTP (simpleHTTP, getRequest, getResponseBody)
 import qualified Data.ByteString.Lazy as LBS (toStrict)
+import Control.Monad (liftM)
 
 -- TODO: proper user home dir
 configFile = "/home/cordawyn/.rss2imap/config.yml"
 readIdsFile = "/home/cordawyn/.rss2imap/read.yml"
-
--- TODO
-feedURL = "http://blog.theoldreader.com/rss"
+feedListFile = "/home/cordawyn/.rss2imap/feeds.txt"
 
 main :: IO ()
-main = do
-  feed <- getFeed feedURL
-  case feed of
-    Nothing -> fail "Feed is empty"
-    Just f  -> do conf <- loadRSS2IMAPConfig configFile
-                  case conf of
-                    Nothing -> fail "Configuration data is empty"
-                    Just c  -> do imap <- connectIMAPPort (imapServer c) (imapPort c)
-                                  login imap (imapUsername c) (imapPassword c)
-                                  readIds <- readFile readIdsFile
-                                  unreadItems <- return $ filterReadItems (getFeedItems f) (lines readIds)
-                                  mapM_ (appendItem imap) unreadItems
-                                  logout imap
+main = (liftM lines . readFile) feedListFile >>= mapM_ sendFeedToIMAP
+
+sendFeedToIMAP :: String -> IO ()
+sendFeedToIMAP feedURL = do
+    feed <- getFeed feedURL
+    case feed of
+      Nothing -> fail "Feed is empty"
+      Just f  -> do conf <- loadRSS2IMAPConfig configFile
+                    case conf of
+                      Nothing -> fail "Configuration data is empty"
+                      Just c  -> do imap <- connectIMAPPort (imapServer c) (imapPort c)
+                                    login imap (imapUsername c) (imapPassword c)
+                                    readIds <- readFile readIdsFile
+                                    unreadItems <- return $ filterReadItems (getFeedItems f) (lines readIds)
+                                    mapM_ (appendItem imap) unreadItems
+                                    logout imap
 
 getFeed :: String -> IO (Maybe Feed)
 getFeed uri = simpleHTTP (getRequest uri) >>= getResponseBody >>= return . parseFeedString
