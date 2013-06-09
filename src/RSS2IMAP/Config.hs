@@ -9,10 +9,12 @@ import Control.Applicative (pure, (<*>))
 import Network.Socket (PortNumber(PortNum))
 
 data Config = Config {
-  imapServer :: String
-, imapPort :: PortNumber
-, imapUsername :: String
-, imapPassword :: String
+  imapServer    :: String
+, imapPort      :: PortNumber
+, imapUsername  :: String
+, imapPassword  :: String
+, imapEmailTo   :: String
+, imapEmailFrom :: String
 }
 
 instance FromJSON Config where
@@ -20,7 +22,9 @@ instance FromJSON Config where
                            cfg .: "server" <*>
                            cfg .: "port" <*>
                            cfg .: "username" <*>
-                           cfg .: "password"
+                           cfg .: "password" <*>
+                           cfg .: "email-to" <*>
+                           cfg .: "email-from"
 
 instance FromJSON PortNumber where
   parseJSON (Number p) = pure $ PortNum $ floor p

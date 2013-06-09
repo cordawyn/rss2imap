@@ -35,12 +35,18 @@ sendFeedToIMAP config feedURL readIds = do
   case feed of
     Nothing -> fail $ "Feed " ++ feedURL ++ " is empty"
     Just f  -> do
-      imap <- connectIMAPPort (imapServer config) (imapPort config)
-      login imap (imapUsername config) (imapPassword config)
+      imap <- connectIMAPPort server port
+      login imap username password
       unreadItems <- return $ filterReadItems (getFeedItems f) readIds
-      newReadIds <- foldrM (appendItem imap) readIds unreadItems
+      newReadIds <- foldrM (appendItem imap emailTo emailFrom) readIds unreadItems
       logout imap
       return newReadIds
+      where server = imapServer config
+            port = imapPort config
+            username = imapUsername config
+            password = imapPassword config
+            emailTo = imapEmailTo config
+            emailFrom = imapEmailFrom config
 
 getFeed :: String -> IO (Maybe Feed)
 getFeed uri = simpleHTTP (getRequest uri) >>= getResponseBody >>= return . parseFeedString
@@ -57,9 +63,9 @@ isReadItem i = elem (getFeedItemId i)
 appendMail :: IMAPConnection -> MailboxName -> Mail -> IO ()
 appendMail c mbox mail = renderMail' mail >>= (append c mbox) . LBS.toStrict
 
-appendItem :: IMAPConnection -> Item -> [String] -> IO [String]
-appendItem con item readIds = do
-  mail <- createMailFromItem item
+appendItem :: IMAPConnection -> String -> String -> Item -> [String] -> IO [String]
+appendItem con emailTo emailFrom item readIds = do
+  mail <- createMailFromItem item emailTo emailFrom
   appendMail con "RSS" mail
   case getItemId item of
     Nothing -> return readIds

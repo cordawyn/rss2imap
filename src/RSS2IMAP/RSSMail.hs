@@ -10,17 +10,18 @@ import Network.Mail.Mime (Mail (..), Address (..), simpleMail)
 import qualified Data.Text as T (pack)
 import qualified Data.Text.Lazy as LT (pack)
 
-createMailFromItem :: Item -> IO Mail
-createMailFromItem i = simpleMail
-                       (Address Nothing "your@email.com")
-                       (Address Nothing "rss2imap@localhost")
-                       (T.pack subject)
-                       (LT.pack plainBody)
-                       (LT.pack htmlBody)
-                       []
-                       where htmlBody = renderHtml $ convertItemToHtml i
-                             plainBody = mailItemSummary i
-                             subject = mailItemTitle i
+createMailFromItem :: Item -> String -> String -> IO Mail
+createMailFromItem i emailTo emailFrom =
+  simpleMail
+    (Address Nothing "your@email.com")
+    (Address Nothing "rss2imap@localhost")
+    (T.pack subject)
+    (LT.pack plainBody)
+    (LT.pack htmlBody)
+    []
+    where htmlBody = renderHtml $ convertItemToHtml i
+          plainBody = mailItemSummary i
+          subject = mailItemTitle i
 
 convertItemToHtml :: Item -> Html
 convertItemToHtml i = h1 << (mailItemLink i)
