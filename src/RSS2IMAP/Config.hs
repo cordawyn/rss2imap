@@ -6,7 +6,7 @@ module RSS2IMAP.Config where
 import Data.Yaml
 import Data.Functor ((<$>))
 import Control.Applicative (pure, (<*>))
-import Network.Socket -- .Types -- TODO: limit imported symbols
+import Network.Socket (PortNumber(PortNum))
 
 data Config = Config {
   imapServer :: String
