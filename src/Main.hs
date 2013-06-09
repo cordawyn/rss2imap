@@ -17,17 +17,21 @@ import Control.Monad (liftM)
 import System.Directory (getAppUserDataDirectory)
 import Data.Foldable (foldrM)
 
+configFile = "config.yml"
+readItemsFile = "read.txt"
+feedListFile = "feeds.txt"
+
 main :: IO ()
 main = do
   appDataDir <- getAppUserDataDirectory "rss2imap"
-  config     <- loadConfig $ appDataDir ++ "/config.yml"
+  config     <- loadConfig $ appDataDir ++ "/" ++ configFile
   case config of
     Nothing -> fail "Configuration data is empty"
     Just c  -> do
-      readIds <- (liftM lines . readFile) $ appDataDir ++ "/read.txt"
-      feeds   <- (liftM lines . readFile) $ appDataDir ++ "/feeds.txt"
+      readIds <- (liftM lines . readFile) $ appDataDir ++ "/" ++ readItemsFile
+      feeds   <- (liftM lines . readFile) $ appDataDir ++ "/" ++ feedListFile
       newReadIds <- foldrM (sendFeedToIMAP c) readIds feeds
-      writeFile (appDataDir ++ "read.yml") $ unlines newReadIds
+      writeFile (appDataDir ++ "/" ++ readItemsFile) $ unlines newReadIds
 
 sendFeedToIMAP :: Config -> String -> [String] -> IO [String]
 sendFeedToIMAP config feedURL readIds = do
