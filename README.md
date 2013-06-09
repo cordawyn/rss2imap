@@ -17,6 +17,7 @@ in order to work. These files are:
 * Main configuration file `config.yaml`
   You can use the following sample:
 
+```
     ---
       server: imap.gmail.com
       port: 993
@@ -24,6 +25,7 @@ in order to work. These files are:
       password: secret
       email-to: nobody@gmail.com
       email-from: rss2imap@localhost
+```
 
   The options are pretty self-explanatory.
   RSS2IMAP uses `email-to` and `email-from` when generating e-mails
