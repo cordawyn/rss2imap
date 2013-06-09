@@ -20,12 +20,12 @@ import Data.Foldable (foldrM)
 main :: IO ()
 main = do
   appDataDir <- getAppUserDataDirectory "rss2imap"
-  config     <- loadConfig $ appDataDir ++ "config.yml"
+  config     <- loadConfig $ appDataDir ++ "/config.yml"
   case config of
     Nothing -> fail "Configuration data is empty"
     Just c  -> do
-      readIds <- (liftM lines . readFile) $ appDataDir ++ "read.txt"
-      feeds   <- (liftM lines . readFile) $ appDataDir ++ "feeds.txt"
+      readIds <- (liftM lines . readFile) $ appDataDir ++ "/read.txt"
+      feeds   <- (liftM lines . readFile) $ appDataDir ++ "/feeds.txt"
       newReadIds <- foldrM (sendFeedToIMAP c) readIds feeds
       writeFile (appDataDir ++ "read.yml") $ unlines newReadIds
 
