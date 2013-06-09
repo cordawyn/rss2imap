@@ -62,6 +62,7 @@ executable rss2imap
                      , html
                      , text
                      , bytestring >=0.10.0.2
+                     , directory
 
   -- extensions:        OverloadedStrings
   --                  , StandaloneDeriving

@@ -14,29 +14,33 @@ import Network.Mail.Mime (Mail (..), renderMail')
 import Network.HTTP (simpleHTTP, getRequest, getResponseBody)
 import qualified Data.ByteString.Lazy as LBS (toStrict)
 import Control.Monad (liftM)
-
--- TODO: proper user home dir
-configFile = "/home/cordawyn/.rss2imap/config.yml"
-readIdsFile = "/home/cordawyn/.rss2imap/read.yml"
-feedListFile = "/home/cordawyn/.rss2imap/feeds.txt"
+import System.Directory (getAppUserDataDirectory)
+import Data.Foldable (foldrM)
 
 main :: IO ()
-main = (liftM lines . readFile) feedListFile >>= mapM_ sendFeedToIMAP
+main = do
+  appDataDir <- getAppUserDataDirectory "rss2imap"
+  config     <- loadConfig $ appDataDir ++ "config.yml"
+  case config of
+    Nothing -> fail "Configuration data is empty"
+    Just c  -> do
+      readIds <- (liftM lines . readFile) $ appDataDir ++ "read.txt"
+      feeds   <- (liftM lines . readFile) $ appDataDir ++ "feeds.txt"
+      newReadIds <- foldrM (sendFeedToIMAP c) readIds feeds
+      writeFile (appDataDir ++ "read.yml") $ unlines newReadIds
 
-sendFeedToIMAP :: String -> IO ()
-sendFeedToIMAP feedURL = do
-    feed <- getFeed feedURL
-    case feed of
-      Nothing -> fail "Feed is empty"
-      Just f  -> do conf <- loadRSS2IMAPConfig configFile
-                    case conf of
-                      Nothing -> fail "Configuration data is empty"
-                      Just c  -> do imap <- connectIMAPPort (imapServer c) (imapPort c)
-                                    login imap (imapUsername c) (imapPassword c)
-                                    readIds <- readFile readIdsFile
-                                    unreadItems <- return $ filterReadItems (getFeedItems f) (lines readIds)
-                                    mapM_ (appendItem imap) unreadItems
-                                    logout imap
+sendFeedToIMAP :: Config -> String -> [String] -> IO [String]
+sendFeedToIMAP config feedURL readIds = do
+  feed <- getFeed feedURL
+  case feed of
+    Nothing -> fail $ "Feed " ++ feedURL ++ " is empty"
+    Just f  -> do
+      imap <- connectIMAPPort (imapServer config) (imapPort config)
+      login imap (imapUsername config) (imapPassword config)
+      unreadItems <- return $ filterReadItems (getFeedItems f) readIds
+      newReadIds <- foldrM (appendItem imap) readIds unreadItems
+      logout imap
+      return newReadIds
 
 getFeed :: String -> IO (Maybe Feed)
 getFeed uri = simpleHTTP (getRequest uri) >>= getResponseBody >>= return . parseFeedString
@@ -53,9 +57,10 @@ isReadItem i = elem (getFeedItemId i)
 appendMail :: IMAPConnection -> MailboxName -> Mail -> IO ()
 appendMail c mbox mail = renderMail' mail >>= (append c mbox) . LBS.toStrict
 
-appendItem :: IMAPConnection -> Item -> IO ()
-appendItem con item = do mail <- createMailFromItem item
-                         appendMail con "RSS" mail
-                         case getItemId item of
-                            Nothing -> return ()
-                            Just (_, iid) -> writeFile readIdsFile iid
+appendItem :: IMAPConnection -> Item -> [String] -> IO [String]
+appendItem con item readIds = do
+  mail <- createMailFromItem item
+  appendMail con "RSS" mail
+  case getItemId item of
+    Nothing -> return readIds
+    Just (_, iid) -> return (iid : readIds)

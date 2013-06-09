@@ -25,5 +25,5 @@ instance FromJSON Config where
 instance FromJSON PortNumber where
   parseJSON (Number p) = pure $ PortNum $ floor p
 
-loadRSS2IMAPConfig :: FilePath -> IO (Maybe Config)
-loadRSS2IMAPConfig = decodeFile
+loadConfig :: FilePath -> IO (Maybe Config)
+loadConfig = decodeFile
