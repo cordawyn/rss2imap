@@ -11,10 +11,10 @@ RSS2IMAP connects to the IMAP server specified in the configuration file,
 iteratively reads the feeds from the list of feeds, creates e-mails for
 unread items and appends them to "RSS" folder at the IMAP server.
 
-The utility reads needs 3 files in your `~/.rss2imap` directory
+The utility needs 3 files in your `~/.rss2imap` directory
 in order to work. These files are:
 
-* Main configuration file `config.yaml`
+* Main configuration file `config.yml`
   You can use the following sample:
 
 ```
