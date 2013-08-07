@@ -2,6 +2,7 @@
 
 import RSS2IMAP.Config
 import RSS2IMAP.RSSMail
+import RSS2IMAP.Connection
 
 import Network.HaskellNet.IMAP
 import Network.HaskellNet.IMAP.Connection (IMAPConnection (..))

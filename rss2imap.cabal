@@ -43,7 +43,7 @@ cabal-version:       >=1.8
 
 
 executable rss2imap
-  hs-source-dirs:      src
+  -- hs-source-dirs:      src
 
   -- .hs or .lhs file containing the Main module.
   main-is:             Main.hs
