@@ -2,3 +2,5 @@
 .*~
 /cabal-dev
 /dist
+/.cabal-sandbox
+/cabal.sandbox.config
