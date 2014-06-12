@@ -52,10 +52,11 @@ executable rss2imap
   -- other-modules:       
   
   -- Other library packages from which modules are imported.
-  build-depends:       base ==4.5.*
+  build-depends:       base >= 4.5
                      , network
                      , HTTP
                      , HaskellNet
+                     , HaskellNet-SSL
                      , yaml
                      , feed
                      , mime-mail

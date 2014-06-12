@@ -2,12 +2,13 @@
 
 import RSS2IMAP.Config
 import RSS2IMAP.RSSMail
-import RSS2IMAP.Connection
 
 import Network.HaskellNet.IMAP
 import Network.HaskellNet.IMAP.Connection (IMAPConnection (..))
 import Network.HaskellNet.IMAP.Types (MailboxName)
 import Network.HaskellNet.IMAP (append)
+import Network.HaskellNet.SSL (defaultSettingsWithPort)
+import Network.HaskellNet.IMAP.SSL (connectIMAPSSLWithSettings)
 import Text.Feed.Query
 import Text.Feed.Types (Feed (..), Item (..))
 import Text.Feed.Import (parseFeedString)
@@ -40,7 +41,7 @@ sendFeedToIMAP config feedURL readIds = do
   case feed of
     Nothing -> fail $ "Feed " ++ feedURL ++ " is empty"
     Just f  -> do
-      imap <- connectIMAPPort server port
+      imap <- connectIMAPSSLWithSettings server (defaultSettingsWithPort port)
       login imap username password
       unreadItems <- return $ filterReadItems (getFeedItems f) readIds
       newReadIds <- foldrM (appendItem imap emailTo emailFrom) readIds unreadItems
