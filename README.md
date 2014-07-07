@@ -55,4 +55,7 @@ in order to work. These files are:
   [feeds2imap.rb](https://github.com/Gonzih/feeds2imap.rb)
   implementation.
 
+See [feeds2gmail](http://www.greghendershott.com/2013/05/feeds2gmail.html)
+for detailed info and references.
+
 [OPML]: https://en.wikipedia.org/wiki/OPML
