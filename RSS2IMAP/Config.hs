@@ -6,7 +6,7 @@ module RSS2IMAP.Config where
 import Data.Yaml
 import Data.Functor ((<$>))
 import Control.Applicative (pure, (<*>))
-import Network.Socket (PortNumber(PortNum))
+import Network (PortNumber)
 
 data Config = Config {
   imapServer    :: String
@@ -27,7 +27,7 @@ instance FromJSON Config where
                            cfg .: "email-from"
 
 instance FromJSON PortNumber where
-  parseJSON (Number p) = pure $ PortNum $ floor p
+  parseJSON (Number p) = pure $ fromInteger $ floor p
 
 loadConfig :: FilePath -> IO (Maybe Config)
 loadConfig = decodeFile
