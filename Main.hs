@@ -58,7 +58,7 @@ getFeed :: String -> IO (Maybe Feed)
 getFeed uri = simpleHTTP (getRequest uri) >>= getResponseBody >>= return . parseFeedString
 
 filterReadItems :: [Item] -> [String] -> [Item]
-filterReadItems items ids = filter (\i -> isReadItem i ids) items
+filterReadItems items ids = filter (\i -> not $ isReadItem i ids) items
 
 isReadItem :: Item -> [String] -> Bool
 isReadItem i = elem (getFeedItemId i)
